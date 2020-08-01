@@ -30,3 +30,18 @@ def __sort(a,b):
 _array.sort(key=cmp_to_key(__sort))
 Logger.debug(str(_array))
 _emitter.on("TEST",lambda v,v1:Logger.info(v,v1)).emit("TEST","This is:","kevin chen")
+
+def decorate(func):
+    def wrapper():
+        print("定义一个装饰器")
+        #func(*args,**kwargs)
+    return wrapper
+
+class AA:
+    @decorate
+    def a():
+        return 1
+
+aa=AA()
+Logger.log(str(aa.a()))
+
