@@ -1,0 +1,21 @@
+{
+  "name": "vitamin",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build:o": "g++ -c src/core/helper.cpp -o src/core/helper.o&&g++ -c src/person.cpp -o src/person.o&&g++ -c main.cpp -o main.o",
+    "build:s": "g++ main.cpp -o main",
+    "build:a": "g++ src/core/logger.o src/core/helper.o src/core/vitamin.o src/models.o src/main.o -o bin/main.exe",
+    "build:f": "gulp compileforce",
+    "build": "gulp compile",
+    "exec": ".\\bin\\main.exe",
+    "start": "py src/main.py"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "gulp": "^4.0.2"
+  }
+}
