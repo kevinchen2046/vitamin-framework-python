@@ -1,47 +1,72 @@
 #!/usr/bin/python
-import vitamin.core.logger
+
 from vitamin.core.logger import Logger
-
-import vitamin.core.event
 from vitamin.core.event import EventEmiter
-
 from functools import cmp_to_key
+from vitamin.vitamin import *
 
-Logger.info("Hello, World!")
+# Model的装饰器 无任何依赖项
+@ModelClass()
+class ModelUser(ModelBase):
+    name="ModelUser!!!!"
+    def initialize(self,*args):
+        Logger.log("ModelUser initialize...")
 
-__map={}
+# Model的装饰器 该Model依赖ModelUser模块
+@ModelClass("ModelUser")
+class ModelLogin(ModelBase):
+    name="ModelLogin!"
+    
+    # 注入ModelUser
+    @property
+    def user(self):return Inject(ModelUser)
 
-__map["a"]=[]
+    def initialize(self,*args):
+        Logger.log("ModelLogin initialize...")
+        Logger.debug(self.user.name)
 
-__list=__map["a"]
+# Command的装饰器 需要填写该Cmd的路由 也可以通过Cmd的className触发该Command
+@CmdClass("game.login")
+class CmdLogin(CommandBase):
+    def exec(self,*args):
+        for arg in args:
+            Logger.warn("CmdLogin:"+str(arg))
 
-_obj={"_a":1,"_b":"hello"}
+# View装饰器     
+@ViewClass
+class ViewLogin(ViewBase):
+    def enter(self,*args):
+        super().exec("game.login",*args)
 
-__list.insert(__list.__len__(),_obj)
+# 单例装饰器 
+@Instance
+class Util():
+    def plus(self,a,b):
+        return a+b
 
-Logger.info(str(__map.get('a').__len__()),str(__map))
 
-_emitter=EventEmiter()
+vitamin=Vitamin()
 
-_array=["b","c","e","y","i","6"]
-def __sort(a,b):
-    return 1 if "y"==a else -1
+# 初始化Vitamin框架
+vitamin.initialize()
 
-_array.sort(key=cmp_to_key(__sort))
-Logger.debug(str(_array))
-_emitter.on("TEST",lambda v,v1:Logger.info(v,v1)).emit("TEST","This is:","kevin chen")
+## 测试单例
+util1=Util()
+util2=Util()
+Logger.debug("util1==util2",str(util1==util2))
 
-def decorate(func):
-    def wrapper():
-        print("定义一个装饰器")
-        #func(*args,**kwargs)
-    return wrapper
+## 测试Model的单例性质
+model1=vitamin.getModel(ModelLogin).user
+model2=vitamin.getModel(ModelUser)
+Logger.debug("model1==model2")
 
-class AA:
-    @decorate
-    def a():
-        return 1
+# 打开界面 执行了一个Command
+vitamin.getView(ViewLogin).enter("Some Thing is Happended")
 
-aa=AA()
-Logger.log(str(aa.a()))
+vitamin.getView(ViewLogin).on("TEST",lambda v,v1:Logger.info("ViewLogin:",v,v1))
+vitamin.getModel(ModelLogin).on("TEST",lambda v,v1:Logger.info("ModelLogin:",v,v1))
 
+# 从View处触发的事件 只有View能接收到
+vitamin.getView(ViewLogin).emit("TEST","This is View:","Kevin")
+# 从Model处触发的事件 Model和View都能接收到
+vitamin.getModel(ModelLogin).emit("TEST","This is Model:","Chen")

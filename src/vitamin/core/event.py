@@ -34,23 +34,23 @@ class EventEmiter :
             off = 0
             for i in _list:
                 _object = _list[i + off]
-                if (_object.method == listener):
+                if (_object["method"] == listener):
                     _list.remove(_object)
                     off = off - 1
         return self
     #-- 发送事件
     def emit (self, type, *arg):
         def _sort(a,b):
-            return 1 if (a.priority > b.priority) else -1
+            return 1 if (a["priority"] > b["priority"]) else -1
         _list = self._map.get(type)
         if(_list==None):return self
         _list.sort(key=cmp_to_key(_sort))
         for _object in _list:
-            _object.get("method")(*arg)
+            _object["method"](*arg)
         return self
 
     def __getIndex(self,_list,listener):
-        for i in _list:
-            if(_list[i].method==listener):
+        for i in range(len(_list)):
+            if(_list[i]["method"]==listener):
                 return i
         return -1
